@@ -1,5 +1,9 @@
+rm(list = ls())
+require(RCurl)
 
+source('CAS_fn.r')
 ###I. Build the cell
+
 
 #set the number of sites in the cell
 N = 10
@@ -15,8 +19,8 @@ names(chrom) = 1:48
 #separate the chromosomes into N sites randomly
 set.seed(20)
 sites = sample(x = 1:10, size = 48, replace = T)
-
 chrom.site = split(chrom, f = as.factor(sites))
+
 
 ###II. Make break in sites
 
@@ -25,41 +29,45 @@ chrom.site = split(chrom, f = as.factor(sites))
 #set mean for total number of breaks
 avgBr = 10
 
+#set parameters in LET
+a = 1 
+L = 2
+
+
 #generate the total number of breaks with poission distribution
 set.seed(20)
 numBr = rpois(n = 1, lambda = avgBr)
+
+#generate the number of breaks created together with LET effect
 set.seed(20)
+breaks = sapply(1:numBr,function(i) rpois(1, lambda = a*L)) + 1
 
-#generate the places where the breaks happen
-breaks = split(sample(x = c(rep(1, numBr), rep(0, 48*(len+2) - numBr)), replace = F), 
-               f = as.factor(rep(1:48, each = len+2)))
+#generate places where first breaks happen
+set.seed(20)
+breaks.pl = sample(1:48, size = numBr, replace = T)
 
-#function that breaks the chromosomes
-find.break = function(breaks, chrom){
-  if(!sum(breaks)){
-    return(chrom)
-  }else{
-    br.pt = c(0, which(breaks == 1), len + 3)
-    subchrom = sapply(1:(length(br.pt) - 1), function(i) 
-      substr(chrom, start = br.pt[i] + 1, stop =  br.pt[i+1]))
-    return(subchrom)
-  }
-}
+#count total number of breaks happen in each site
+breaks = split(breaks, f = as.factor(sites[breaks.pl]))
+breaks = lapply(breaks, sum)
+breaks0 = rep(list(0), N)
+names(breaks0) = 1:N
+breaks = merge.list(breaks, breaks0)
 
-#function that create all breaks generated above
-chrom.replace = function(chrom.name){
-  site = sites[chrom.name]
-  chrom = chrom.site[[site]][as.character(chrom.name)]
-  chrom.site[[site]] <<- chrom.site[[site]][names(chrom.site[[site]]) != as.character(chrom.name)]
-  chrom.site[[site]] <<- c(chrom.site[[site]], find.break(breaks[[chrom.name]], chrom))
-}
+
+
+#generate places where breaks happen in each site
+breaks = sapply(1:N, site.breaks)
+breaks = unlist(breaks, recursive = F)
+breaks = breaks[order(as.numeric(names(breaks)))]
+
+
+
+
+
 
 #create breaks. The broken chromosomes are still stored in chrom.site
 sapply(1:48, chrom.replace)
 
 
-#set parameters in LET
-a = 1 
-L = 2
 
 
