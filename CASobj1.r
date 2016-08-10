@@ -1,8 +1,8 @@
 rm(list = ls())
 ### I. Load required packages, functions and objects
 require(RCurl)
-source("CASobj_prim.r")#load the objects
-source("CASobj_fn.r")#load the functions
+source("CASobj_prim1.r")#load the objects
+source("CASobj_fn1.r")#load the functions
 
 ### II. Build the cell
 ## Set Needed parameters
