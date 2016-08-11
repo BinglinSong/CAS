@@ -76,8 +76,8 @@ FE.chrom = lapply(1:N, create.FE)
 ### IV. Make misrejoining in sites
 
 ## Set parameters for the Markov process during misrejoining
-A = 1
-B = 0.2
+A = 1#the parameter that effects the rate of restitution, the larger A is, the higher the rate of restitution is.
+B = 0.2#the parameter that effects the rate of misrejoining, the larger B is, the higher the rate of misrejoining is.
 
 ## Create Misrejoining
 set.seed(20)
